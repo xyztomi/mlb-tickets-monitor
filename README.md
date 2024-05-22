@@ -4,10 +4,10 @@
 
 To get started with MLB Tickets, follow these steps:
 
-1. Clone the repository:
+1. Clone the repository (SSH):
 
   ```bash
-  git clone [<repository-url>](https://github.com/yaelahtom/mlb-tickets-monitor.git)
+  git clone git@github.com:yaelahtom/mlb-tickets-monitor.git
   ```
 
 2. Navigate to the project folder:
