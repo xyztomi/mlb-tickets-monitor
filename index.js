@@ -51,7 +51,7 @@ puppeteer.use(ProxyRouter({
 }));
 
 // Function to parse XML and save to result.json
-const parseAndSaveXML = (xmlData) => {
+const parseAndSaveXML = async (xmlData) => {
   const parser = new xml2js.Parser();
   parser.parseString(xmlData, (err, result) => {
     if (err) throw err;
@@ -97,9 +97,11 @@ const parseAndSaveXML = (xmlData) => {
     });
 
     // Write the result to result.json
-    fs.writeFile('result.json', JSON.stringify(resultData, null, 2), err => {
+    fs.writeFile('result.json', JSON.stringify(resultData, null, 2), async err => {
       if (err) throw err;
       console.log('Data has been written to result.json');
+
+      process.exit(); // exit immediately
     });
   });
 };
@@ -119,8 +121,16 @@ async function main(url) {
     ],
   });
 
-  const page = await browser.newPage();
+  browser.on('error', (err) => {
+    if (err.includes('Error: Navigating frame was detached')) {
+      console.warn('Ignoring "Navigating frame was detached" error');
+      return;
+    }
+    // console.error(err);
+  });
+
   console.log("Intercepting...");
+  const page = await browser.newPage();
   await page.setRequestInterception(true);
 
   page.on('response', async (response) => {
@@ -128,18 +138,18 @@ async function main(url) {
     if (url.includes('https://mlb.tickets.com/api/pvodc/v1/events/navmap/availability')) {
       console.log("Got the API url...");
       const textResponse = await response.text();
-      fs.writeFileSync('resultHeadless.xml', textResponse, 'utf-8');
-      console.log('Intercepted response saved to resultHeadless.xml');
-      
-      // Parse and save the XML data
+      // fs.writeFileSync('resultHeadless.xml', textResponse, 'utf-8');
+      console.log('Intercepted response processed');
+
+      // Parse and save the XML data directly
       parseAndSaveXML(textResponse);
     }
   });
 
   await page.goto(url);
+  await browser.close()
   // await sleep(2000); 
 
-  await browser.close();
 }
 
 // Get the URL from command-line arguments
