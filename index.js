@@ -108,7 +108,7 @@ const parseAndSaveXML = (xmlData) => {
 async function main(url) {
   const browser = await puppeteer.launch({
     ignoreHTTPSErrors: true,
-    headless: false,
+    headless: true,
     defaultViewport: { width: 800, height: 600 },
     args: [
       "--start-maximized",
